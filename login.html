@@ -14,23 +14,14 @@
     <input type='button' value='登陆' id='login' />
     </form>
     <script type='text/javascript'>
-        var login = document.getElementById('login'),
-                    connection = new Imjs.connection();
-        login.onclick = function () {
-            connection.connect(
-                                function (data) {
-                                    console.log(data.text);
-                                },
-                                function (err) {
-                                    console.log(err.responseText);
-                                });
-        };
+    
+        var login = document.getElementById('login');
 
-        Imjs.collection.get({}, {}, function (data) {
+
+        imjs.document.get(function (data) {
             console.log(data);
         });
-
-
+			
     </script>
 </body>
 </html>

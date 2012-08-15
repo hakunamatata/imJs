@@ -6,27 +6,19 @@
 
 (function ($, scope) {
 
-
-
     var 
-
-    // remote Server Options
-
-    remoteOption = {
-
-        hostname: 'localhost',
-
-        port: 3000,
-
-        authorize: 'authorize',
-
-        obtain: 'obtain'
-
-    },
-
+	
+	certificate = {
+		
+		cert: 'xymbtc',
+		
+		proj: 'database'
+		
+	},
+	
     // the class defineder
 
-	Class = function () {
+	Class = function (parent) {
 
 	    var klass = function () {
 
@@ -34,11 +26,23 @@
 
 	    };
 
-
+		if(parent){
+		
+			var subclass = function(){};
+			
+			subclass.prototype = parent.prototype;
+			
+			klass.prototype = new subclass;
+			
+		};		
 
 	    klass.prototype.init = function () { };
 
 	    klass.fn = klass.prototype;
+	    
+	    klass.fn.parent = klass;
+	    
+	    klass._super = klass.__proto__;
 
 
 
@@ -61,38 +65,47 @@
 	},
 
 
-
     noop = function () { };
 
 
-
-
-
     var 
+    
+	// the server class
+	
+	$server = new Class;
+	
+	$server.extend({
+			
+		hostname : 'localhost',
 
-    // the connection Class
+	    port : 3000,
+	
+    	authorize : 'authorize',
 
-    connection = new Class;
+        obtain : 'obtain',
+        
+        
+        _cert : certificate.cert,
+        
+        _proj : certificate.proj
+		
+	});
+	
+/*    // the connection Class
 
-    connection.extend({
+    $connection = new Class($server);
+
+    $connection.extend({
 
         init: function () {
-
-            this.hostname = remoteOption.hostname;
-
-            this.port = remoteOption.port;
-
-            this.authorize = remoteOption.authorize;
-
+				
             this.form = arguments.length == 1 ?
 
-						    document.forms[arguments[0].toString()] :
+						document.forms[arguments[0].toString()] :
 
-						    document.forms[0];
+						document.forms[0];
 
         },
-
-
 
         connect: function (success, error) {
 
@@ -126,27 +139,19 @@
 
     });
 
-
-
-
+*/
 
     // the collection claass
 
     var 
 
-    collection = new Class;
+    $collection = new Class($server);
 
-    collection.extend({
+    $collection.extend({
 
         init: function () {
 
-            this.hostname = remoteOption.hostname;
-
-            this.port = remoteOption.port;
-
-            this.obtain = remoteOption.obtain;
-
-            this.class = 'collection';
+            this.type = 'collections';
 
         },
 
@@ -164,50 +169,116 @@
 
                       ].join(''),
 
-                data =
+                data = {
 
-                {
-
-                    class: this.class,
+                    type: this.type,
 
                     where: where,
 
                     select: select,
+                    
+                    cert: this._cert,
+                    
+                    proj: this._proj,
 
                     ts: (new Date).toString()
 
                 };
 
-
-
             $.ajax({ type: 'POST', url: url, data: data, dataType: 'json', success: success, error: error || noop });
 
         }
 
-
-
     });
 
+	// the document class
+	
+	var 
+	
+	$document = new Class($server);
+	
+	$document.extend({
+		
+		init: function(){
+		
+			this.type = 'documents';
+		
+				
+		},
+		
+		get: function(where, select, success, error){
+		
+			var n = arguments.length,
+				w = where,
+				s = select,
+				$s = success,
+				$e = error;
 
+
+			
+			switch(n)
+			{
+				case 0:
+					throw 'arguments missed';
+					break;
+				case 1:
+					w = null;
+					s = null;
+					$s = arguments[0];
+					break;
+				case 2:
+					s = null;
+					$s = arguments[1];
+					break;
+				default:
+					break;
+			}
+			
+			var url = ['http://',
+						
+						this.hostname, ':',
+						
+						this.port, '/',
+						
+						this.obtain,
+			
+					  ].join(''),
+					  
+				data = {
+				
+					type: this.type,
+					
+					where: w,
+					
+					select: s,
+					
+					cert: this._cert,
+                    
+                    proj: this._proj,
+					
+					ts:(new Date).toString()
+					
+				};
+				
+			$.ajax({ type: 'POST', url: url, data: data, dataType: 'json', success: $s, error: $e || noop });
+					
+		}
+		
+	})
 
     //  the Imjs Class
 
-    var im = new Class;
+    var $imjs = new Class;
 
+    $imjs.extend({
 
-
-    im.extend({
-
-        connection: connection,
-
-        collection: new collection()
+        collection: new $collection(),
+        
+        document: new $document()
 
     });
 
 
-
-    scope.Imjs = new im();
-
-
+	scope.imjs = new $imjs();
 
 })(jQuery, window);
