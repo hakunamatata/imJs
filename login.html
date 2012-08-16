@@ -3,25 +3,30 @@
 <head>
     <title></title>
     <script src="jquery.js" type="text/javascript"></script>
+    <script src="jquery-templ.js" type="text/javascript"></script>
     <script src="Im.js" type="text/javascript"></script>
 </head>
 <body>
-    <form action='/' method='post'>
-    用户名:<input type='text' value='' id='name' />
-    <br />
-    密 码:<input type='password' value='' id='password' />
-    <br />
-    <input type='button' value='登陆' id='login' />
-    </form>
     <script type='text/javascript'>
-    
         var login = document.getElementById('login');
 
+        imjs.document.get(documentHandle);
+        function documentHandle(data) {
+            for (i in data) {
+                $('#tempDemo').tmpl(data[i]).appendTo('body');
+            }
+        }
 
-        imjs.document.get(function (data) {
-            console.log(data);
-        });
-			
+    </script>
+    <script id="tempDemo" type="text/template">
+        <div>
+        <h2>${title}
+        </h2>
+        <span>${category}</span>
+        <div>${content}
+        </div>
+        <span>========================分割线=======================</span>
+    </div>
     </script>
 </body>
 </html>

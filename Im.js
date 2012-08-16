@@ -151,7 +151,7 @@
 
         init: function () {
 
-            this.type = 'collections';
+            this.type = 'category';
 
         },
 
@@ -201,7 +201,7 @@
 		
 		init: function(){
 		
-			this.type = 'documents';
+			this.type = 'document';
 		
 				
 		},
